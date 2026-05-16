@@ -13,10 +13,12 @@ pipeline {
             }
         }
         stage('Run Container') {
-            steps {
-                sh 'docker run -d -p 8090:80 --name my-app my-app:latest'
-            }
-        }
+    steps {
+        sh 'docker stop my-app || true'
+        sh 'docker rm my-app || true'
+        sh 'docker run -d -p 8090:80 --name my-app my-app:latest'
+    }
+}
     }
 
     post {
