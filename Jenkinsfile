@@ -1,4 +1,3 @@
- 
 pipeline {
     agent any
 
@@ -27,7 +26,10 @@ pipeline {
 
     post {
         success {
-            echo 'All stages passed!'
+            slackSend color: 'good', message: "✅ Build Success! - ${env.JOB_NAME}"
+        }
+        failure {
+            slackSend color: 'danger', message: "❌ Build Failed! - ${env.JOB_NAME}"
         }
     }
 }
