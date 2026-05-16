@@ -4,32 +4,27 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-                echo 'Code cloned successfully! - v3'
+                echo 'Code cloned successfully!'
             }
         }
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                sh 'echo Build Done'
+                sh 'docker build -t my-app:latest .'
             }
         }
-        stage('Test') {
+        stage('Run Container') {
             steps {
-                sh 'echo Tests Passed'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                sh 'echo Deployed!'
+                sh 'docker run -d -p 8090:80 --name my-app my-app:latest'
             }
         }
     }
 
     post {
-    success {
-        slackSend color: 'good', message: "✅ Build Success! - ${env.JOB_NAME} #${env.BUILD_NUMBER}"
-    }
-    failure {
-        slackSend color: 'danger', message: "❌ Build Failed! - ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+        success {
+            slackSend color: 'good', message: "✅ Build Success! - ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+        }
+        failure {
+            slackSend color: 'danger', message: "❌ Build Failed! - ${env.JOB_NAME} #${env.BUILD_NUMBER}"
         }
     }
 }
