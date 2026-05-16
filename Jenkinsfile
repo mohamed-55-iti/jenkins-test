@@ -5,7 +5,7 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-                echo 'Code cloned successfully!'
+                echo 'Code cloned successfully! - v2'
             }
         }
         stage('Build') {
