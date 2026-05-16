@@ -25,11 +25,11 @@ pipeline {
     }
 
     post {
-        success {
-            slackSend color: 'good', message: "✅ Build Success! - ${env.JOB_NAME}"
-        }
-        failure {
-            slackSend color: 'danger', message: "❌ Build Failed! - ${env.JOB_NAME}"
+    success {
+        slackSend color: 'good', message: "✅ Build Success! - ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+    }
+    failure {
+        slackSend color: 'danger', message: "❌ Build Failed! - ${env.JOB_NAME} #${env.BUILD_NUMBER}"
         }
     }
 }
