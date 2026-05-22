@@ -8,8 +8,7 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-                git branch: 'main',
-                    url: "${GIT_REPO}"
+                git branch: 'main', url: "${GIT_REPO}"
             }
         }
         stage('Build Image') {
@@ -25,7 +24,7 @@ pipeline {
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
                 )]) {
-                    sh "echo $PASS | docker login -u $USER --password-stdin"
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
                     sh "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}"
                     sh "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
                 }
@@ -39,12 +38,15 @@ pipeline {
                     passwordVariable: 'GIT_PASS'
                 )]) {
                     sh """
+                        git fetch origin
+                        git checkout gitops
+                        git pull origin gitops
                         sed -i 's|image:.*|image: ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}|' deployment.yaml
-                        git config user.email 'jenkins@ci.com'
-                        git config user.name 'Jenkins'
+                        git config user.email "jenkins@ci.com"
+                        git config user.name "Jenkins"
                         git add deployment.yaml
-                        git commit -m 'Update image to build ${BUILD_NUMBER}'
-                        git push https://${GIT_USER}:${GIT_PASS}@github.com/mohamed-55-iti/jenkins-test.git main
+                        git commit -m "Update image to build ${BUILD_NUMBER}"
+                        git push https://\${GIT_USER}:\${GIT_PASS}@github.com/mohamed-55-iti/jenkins-test.git gitops
                     """
                 }
             }
