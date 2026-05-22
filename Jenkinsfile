@@ -111,7 +111,7 @@ pipeline {
 
         success {
 
-            mail to: 'YOUR_EMAIL@gmail.com',
+            mail to: 'mmmnnn11755@gmail.com',
 
                  subject: "SUCCESS - Build #${BUILD_NUMBER}",
 
