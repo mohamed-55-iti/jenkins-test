@@ -1,32 +1,53 @@
 pipeline {
-    agent { label 'agent-01' }
-
+    agent any
+    environment {
+        DOCKERHUB_USER = 'YOUR_DOCKERHUB_USERNAME'
+        IMAGE_NAME     = 'jenkins-test'
+        GIT_REPO       = 'https://github.com/mohamed-55-iti/jenkins-test.git'
+    }
     stages {
         stage('Clone') {
             steps {
-                echo 'Code cloned successfully!'
+                git branch: 'main',
+                    url: "${GIT_REPO}"
             }
         }
-        stage('Build Docker Image') {
+        stage('Build Image') {
             steps {
-                sh 'docker build -t my-app:latest .'
+                sh "docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER} ."
+                sh "docker tag ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER} ${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
             }
         }
-        stage('Run Container') {
+        stage('Push to DockerHub') {
             steps {
-                sh 'docker stop my-app || true'
-                sh 'docker rm my-app || true'
-                sh 'docker run -d -p 8090:80 --name my-app my-app:latest'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+                    sh "echo $PASS | docker login -u $USER --password-stdin"
+                    sh "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}"
+                    sh "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
+                }
             }
         }
-    }
-
-    post {
-        success {
-            slackSend color: 'good', message: "✅ Build Success on Agent-01! - ${env.JOB_NAME} #${env.BUILD_NUMBER}"
-        }
-        failure {
-            slackSend color: 'danger', message: "❌ Build Failed! - ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+        stage('Update Manifest') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-creds',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_PASS'
+                )]) {
+                    sh """
+                        sed -i 's|image:.*|image: ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}|' deployment.yaml
+                        git config user.email 'jenkins@ci.com'
+                        git config user.name 'Jenkins'
+                        git add deployment.yaml
+                        git commit -m 'Update image to build ${BUILD_NUMBER}'
+                        git push https://${GIT_USER}:${GIT_PASS}@github.com/mohamed-55-iti/jenkins-test.git main
+                    """
+                }
+            }
         }
     }
 }
