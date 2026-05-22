@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKERHUB_USER = 'YOUR_DOCKERHUB_USERNAME'
+        DOCKERHUB_USER = 'mohamed11755'
         IMAGE_NAME     = 'jenkins-test'
         GIT_REPO       = 'https://github.com/mohamed-55-iti/jenkins-test.git'
     }
