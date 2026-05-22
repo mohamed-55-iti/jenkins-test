@@ -83,7 +83,7 @@ pipeline {
 
                         git checkout gitops
 
-                        git pull origin gitops
+                        git pull --rebase origin gitops
 
                         sed -i 's|image:.*|image: ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}|' deployment.yaml
 
