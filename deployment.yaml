@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: jenkins-test
-        image: mohamed11755/jenkins-test:5
+        image: mohamed11755/jenkins-test:30
         ports:
         - containerPort: 80
 ---
